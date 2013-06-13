@@ -1,0 +1,21 @@
+TODO
+====
+
+- make sure that we deal correctly with NFC/NFD unicode forms
+- find a clean and extensible way to register new language schemes/plugins
+  (eg: opensubtitles, tmdb, etc...)
+- naming convention: LanguageList or language_list (LanguageList is correct,
+  but language_list looks more like the builtin type)
+- check in IETF recommendation whether country should be named region or sth else
+  (eg: Latin America is not a country)
+
+
+Relevant information
+====================
+
+- ISO standard for languages: http://en.wikipedia.org/wiki/ISO_639
+- ISO standard for countries: http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+
+- IETF language tag (probably the most complete information about what we need):
+  http://en.wikipedia.org/wiki/IETF_language_tag
+- RFC 5646 (language tag best practices): http://tools.ietf.org/html/rfc5646
