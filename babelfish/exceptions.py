@@ -4,9 +4,19 @@
 # Use of this source code is governed by the 3-clause BSD license
 # that can be found in the LICENSE file.
 #
-from .language import *
-from .country import *
-from .converters import *
 
 
-load_converters()
+class BabelfishError(Exception):
+    pass
+
+
+class ConverterError(BabelfishError):
+    pass
+
+
+class NoConversionError(ConverterError):
+    pass
+
+
+class NoConverterError(ConverterError):
+    pass

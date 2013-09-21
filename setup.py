@@ -1,63 +1,38 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# BabelFish - A module for working with languages and countries
-# Copyright (c) 2013 Antoine Bertin <diaoulael@gmail.com>
-# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 the BabelFish authors. All rights reserved.
+# Use of this source code is governed by the 3-clause BSD license
+# that can be found in the LICENSE file.
 #
-# BabelFish is free software; you can redistribute it and/or modify it under
-# the terms of the Lesser GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# BabelFish is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# Lesser GNU General Public License for more details.
-#
-# You should have received a copy of the Lesser GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-
-from setuptools import setup
-import os
-import babelfish
+from setuptools import setup, find_packages
 
 
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
-NEWS = open(os.path.join(here, 'NEWS.rst')).read()
-
-requires = []
-
-
-args = dict(name = 'babelfish',
-            version = babelfish.__version__,
-            description = 'A module for working with languages and countries.',
-            long_description = README + '\n\n' + NEWS,
-            # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-            classifiers = [ 'Development Status :: 2 - Pre-Alpha',
-                            'License :: OSI Approved :: BSD License',
-                            'Operating System :: OS Independent',
-                            'Intended Audience :: Developers',
-                            'Programming Language :: Python :: 2',
-                            'Programming Language :: Python :: 2.7',
-                            'Programming Language :: Python :: 3',
-                            'Programming Language :: Python :: 3.3',
-                            'Topic :: Software Development :: Libraries :: Python Modules'
-                            ],
-            keywords = 'babelfish language country locale python library',
-            author = 'Nicolas Wack',
-            author_email = 'wackou@gmail.com',
-            url = 'http://babelfish.readthedocs.org/',
-            license = 'BSD',
-            packages = [ 'babelfish', 'babelfish.test' ],
-            include_package_data=True,
-            install_requires = requires,
-            entry_points=entry_points,
-            #extras_require = { 'language_detection':  ['guess-language>=0.2'] },
-            test_suite = 'babelfish.test'
-            )
-
-
-setup(**args)
+setup(name='babelfish',
+    version='0.1-dev',
+    license='BSD',
+    description='A module for working with languages and countries',
+    long_description=open('README.rst').read() + '\n\n' + open('CHANGES').read(),
+    keywords='babelfish language country locale',
+    url='https://github.com/wackou/babelfish',
+    author='Nicolas Wack',
+    author_email='wackou@gmail.com',
+    packages=find_packages(),
+    include_package_data=True,
+    package_data={'babelfish': ['iso-639-3.tab', 'iso-3166-1.txt']},
+    classifiers=['Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Topic :: Multimedia :: Video',
+        'Topic :: Software Development :: Libraries :: Python Modules'],
+    test_suite='babelfish.tests.suite',
+    entry_points={'babelfish.converters': ['alpha2 = babelfish.converters.alpha2:Alpha2Converter',
+                                           'alpha3b = babelfish.converters.alpha3b:Alpha3BConverter',
+                                           'name = babelfish.converters.name:NameConverter',
+                                           'opensubtitles = babelfish.converters.opensubtitles:OpenSubtitlesConverter']})

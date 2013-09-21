@@ -25,3 +25,17 @@ nosetests.xml
 
 # Translations
 *.mo
+
+# Mr Developer
+.mr.developer.cfg
+
+# Pydev
+.project
+.pydevproject
+.settings
+
+# Rope
+.ropeproject
+
+# Sphinx
+docs/_build

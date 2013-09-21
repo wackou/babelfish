@@ -1,114 +1,73 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2013 the BabelFish authors. All rights reserved.
 # Use of this source code is governed by the 3-clause BSD license
 # that can be found in the LICENSE file.
 #
-
-from __future__ import unicode_literals, print_function, division
-from babelfish import UnicodeMixin
-
-
-class Language(UnicodeMixin):
-    """This class represents a human language.
-
-    You can initialize it with pretty much anything, as it knows conversion
-    from ISO-639 2-letter and 3-letter codes, English and French names.
-
-    You can also distinguish languages for specific countries, such as
-    Portuguese and Brazilian Portuguese.
-
-    There are various properties on the language object that give you the
-    representation of the language for a specific usage, such as .alpha3
-    to get the ISO 3-letter code, or .opensubtitles to get the OpenSubtitles
-    language code.
+from __future__ import unicode_literals
+from pkg_resources import resource_stream  # @UnresolvedImport
+from .converters import CONVERTERS
+from .country import Country
 
 
-    >>> Language('fr')
-    Language(French)
+__all__ = ['LANGUAGES', 'Language']
 
-    >>> Language('eng').french_name
-    'anglais'
 
-    >>> Language('pt(br)').country.name
-    'Brazil'
+LANGUAGES = set()
+with resource_stream('babelfish', 'iso-639-3.tab') as f:
+    f.readline()
+    for l in f:
+        (alpha3, _, _, _, _, _, _, _) = l.decode('utf-8').split('\t')
+        LANGUAGES.add(alpha3)
 
-    >>> Language('Español (Latinoamérica)').country.name
-    'Latin America'
 
-    >>> Language('Spanish (Latin America)') == Language('Español (Latinoamérica)')
-    True
+class Language(object):
+    """A human language
 
-    >>> Language('zz', strict=False).name
-    'Undetermined'
+    A human language is composed of a language part following the ISO-639
+    standard and can be country-specific as per the ISO-3166 standard.
 
-    >>> Language('pt(br)').opensubtitles
+    The :class:`Language` is extensible with plug-ins to support custom
+    language conversions. Refer to the `plug-ins`__ section for more details.
+
+    >>> Language('fra')
+    <Language fra>
+
+    >>> Language('ara').alpha2
+    'ar'
+
+    >>> Language('por', 'BR').opensubtitles
     'pob'
 
     """
+    def __init__(self, language, country=None):
+        if language not in LANGUAGES:
+            raise ValueError('{} is not a valid language'.format(language))
+        self.alpha3 = language
+        self.country = None
+        if isinstance(country, Country):
+            self.country = country
+        elif isinstance(country, (str, unicode)):
+            self.country = Country(country)
 
-    def __init__(self, language, country=None, strict=False, scheme=None):
-        """Check in IETF recommendation whether:
-          - country should be named region or sth else (eg: Latin America is not a country)
-
-        :param bool strict: if strict=True, raise ValueError on unknown language
-                            if strict=False, return Language(Undetermined)
-
-        """
-        raise NotImplementedError
-
-
-    @property
-    def alpha2(self):
-        raise NotImplementedError
-
-    @property
-    def alpha3(self):
-        raise NotImplementedError
-
-    @property
-    def terminological(self):
-        """See http://en.wikipedia.org/wiki/ISO_639-2#B_and_T_codes for a more
-        detailed description."""
-        raise NotImplementedError
-
-    @property
-    def name(self):
-        raise NotImplementedError
-
-    @property
-    def french_name(self):
-        raise NotImplementedError
-
-
+    def __getattr__(self, name):
+        if name not in CONVERTERS:
+            raise AttributeError
+        return CONVERTERS[name].convert(self.alpha3, self.country.alpha2 if self.country is not None else None)
 
     def __hash__(self):
-        raise NotImplementedError
+        if self.country is None:
+            return hash(self.alpha3)
+        return hash(self.alpha3 + '-' + self.country.alpha2)
 
     def __eq__(self, other):
-        raise NotImplementedError
+        return self.alpha3 == other.alpha3 and self.country == other.country
 
     def __ne__(self, other):
         return not self == other
 
-    def __nonzero__(self):
-        raise NotImplementedError
-
     def __unicode__(self):
-        raise NotImplementedError
+        return self.alpha3
 
     def __repr__(self):
-        raise NotImplementedError
-
-
-
-    ## Should be dealt with as a plugin
-    @property
-    def opensubtitles(self):
-        raise NotImplementedError
-
-    ## Should be dealt with as a plugin
-    @property
-    def tmdb(self):
-        raise NotImplementedError
+        return '<Language {}>'.format(self.name)
