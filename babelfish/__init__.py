@@ -7,3 +7,4 @@
 from .language import *
 from .country import *
 from .converters import *
+from .exceptions import *

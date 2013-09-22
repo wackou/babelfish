@@ -7,6 +7,8 @@
 from __future__ import unicode_literals
 from pkg_resources import resource_stream  # @UnresolvedImport
 
+__all__ = ['COUNTRIES', 'Country']
+
 
 COUNTRIES = {}
 with resource_stream('babelfish', 'iso-3166-1.txt') as f:
@@ -22,7 +24,6 @@ class Country(object):
     A country is represented by an alpha-2 code from the ISO-3166 standard
 
     """
-
     def __init__(self, country):
         if country not in COUNTRIES:
             raise ValueError('{} is not a valid country'.format(country))
@@ -36,7 +37,7 @@ class Country(object):
         return hash(self.alpha2)
 
     def __eq__(self, other):
-        raise self.alpha2 == other.alpha2
+        return self.alpha2 == other.alpha2
 
     def __ne__(self, other):
         return not self == other

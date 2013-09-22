@@ -6,15 +6,12 @@
 #
 from __future__ import unicode_literals
 from functools import partial
-from pkg_resources import resource_stream  # @UnresolvedImport
-from .converters import CONVERTERS, load_converters
+from pkg_resources import resource_stream, iter_entry_points  # @UnresolvedImport
 from .country import Country
 
+__all__ = ['CONVERTERS', 'reload_converters', 'LANGUAGES', 'Language', 'register_converter', 'unregister_converter']
 
-__all__ = ['LANGUAGES', 'Language']
 
-
-load_converters()
 LANGUAGES = set()
 with resource_stream('babelfish', 'iso-639-3.tab') as f:
     f.readline()
@@ -22,14 +19,25 @@ with resource_stream('babelfish', 'iso-639-3.tab') as f:
         (alpha3, _, _, _, _, _, _, _) = l.decode('utf-8').split('\t')
         LANGUAGES.add(alpha3)
 
+CONVERTERS = {}
+
+
+def reload_converters():
+    CONVERTERS.clear()
+    for ep in iter_entry_points('babelfish.converters'):
+        if ep.name not in CONVERTERS:
+            CONVERTERS[ep.name] = ep.load()()
+
 
 class LanguageMeta(type):
     def __init__(cls, name, bases, attrs):
-        def from_code(cls, code, converter):
+        reload_converters()
+
+        def fromcode(cls, code, converter):
             return cls(*CONVERTERS[converter].reverse(code))
 
         for converter_name in CONVERTERS.keys():
-            setattr(cls, 'from_' + converter_name, classmethod(partial(from_code, converter=converter_name)))
+            setattr(cls, 'from' + converter_name, classmethod(partial(fromcode, converter=converter_name)))
         return super(LanguageMeta, cls).__init__(name, bases, attrs)
 
 
@@ -43,7 +51,7 @@ class Language(object):
     language conversions. Refer to the `plug-ins`__ section for more details.
 
     >>> Language('fra')
-    <Language fra>
+    <Language French>
 
     >>> Language('ara').alpha2
     'ar'
@@ -87,3 +95,18 @@ class Language(object):
         if self.country is not None:
             return '<Language {}, country={}>'.format(self.name, self.country.name)
         return '<Language {}>'.format(self.name)
+
+
+def register_converter(name, converter):
+    CONVERTERS[name] = converter()
+
+    def fromcode(cls, code, converter):
+        return cls(*CONVERTERS[converter].reverse(code))
+    setattr(Language, 'from' + name, classmethod(partial(fromcode, converter=name)))
+
+
+def unregister_converter(name):
+    if name not in CONVERTERS:
+        raise ValueError('{} is not a converter'.format(name))
+    del CONVERTERS[name]
+    delattr(Language, 'from' + name)

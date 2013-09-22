@@ -29,4 +29,4 @@ class Alpha3BConverter(Converter):
     def reverse(self, alpha3b):
         if alpha3b not in self.from_alpha3b:
             raise NoConversionError
-        return self.from_alpha3b[alpha3b]
+        return (self.from_alpha3b[alpha3b], None)

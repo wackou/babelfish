@@ -29,4 +29,4 @@ class Alpha2Converter(Converter):
     def reverse(self, alpha2):
         if alpha2 not in self.from_alpha2:
             raise NoConversionError
-        return self.from_alpha2[alpha2]
+        return (self.from_alpha2[alpha2], None)

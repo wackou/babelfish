@@ -29,4 +29,4 @@ class NameConverter(Converter):
     def reverse(self, name):
         if name not in self.from_name:
             raise NoConversionError
-        return self.from_name[name]
+        return (self.from_name[name], None)
