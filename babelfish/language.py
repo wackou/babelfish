@@ -5,20 +5,32 @@
 # that can be found in the LICENSE file.
 #
 from __future__ import unicode_literals
+from functools import partial
 from pkg_resources import resource_stream  # @UnresolvedImport
-from .converters import CONVERTERS
+from .converters import CONVERTERS, load_converters
 from .country import Country
 
 
 __all__ = ['LANGUAGES', 'Language']
 
 
+load_converters()
 LANGUAGES = set()
 with resource_stream('babelfish', 'iso-639-3.tab') as f:
     f.readline()
     for l in f:
         (alpha3, _, _, _, _, _, _, _) = l.decode('utf-8').split('\t')
         LANGUAGES.add(alpha3)
+
+
+class LanguageMeta(type):
+    def __init__(cls, name, bases, attrs):
+        def from_code(cls, code, converter):
+            return cls(*CONVERTERS[converter].reverse(code))
+
+        for converter_name in CONVERTERS.keys():
+            setattr(cls, 'from_' + converter_name, classmethod(partial(from_code, converter=converter_name)))
+        return super(LanguageMeta, cls).__init__(name, bases, attrs)
 
 
 class Language(object):
@@ -40,6 +52,8 @@ class Language(object):
     'pob'
 
     """
+    __metaclass__ = LanguageMeta
+
     def __init__(self, language, country=None):
         if language not in LANGUAGES:
             raise ValueError('{} is not a valid language'.format(language))
@@ -70,4 +84,6 @@ class Language(object):
         return self.alpha3
 
     def __repr__(self):
+        if self.country is not None:
+            return '<Language {}, country={}>'.format(self.name, self.country.name)
         return '<Language {}>'.format(self.name)

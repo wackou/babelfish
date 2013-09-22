@@ -7,6 +7,3 @@
 from .language import *
 from .country import *
 from .converters import *
-
-
-load_converters()
